@@ -6,7 +6,8 @@ import com.blog.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 /**
@@ -21,7 +22,8 @@ public class DashboardService {
     @Autowired
     private UserMapper userMapper;
 
-    @Cacheable(value = "dashboard", key = "'stats'")
+    @Cacheable(value = "dashboard", key = "'admin:dashboard'")
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public DashboardStats getDashboardStats() {
         DashboardStats stats = new DashboardStats();
         stats.setTodayNewBlogs(blogMapper.countTodayNewBlogs());

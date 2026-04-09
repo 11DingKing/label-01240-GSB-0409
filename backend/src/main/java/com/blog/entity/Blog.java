@@ -37,3 +37,4 @@ public class Blog {
     private String rejectReason;  // 拒绝原因
     private Long reviewerId;      // 审核人ID
     private String reviewerName;  // 审核人姓名
+}

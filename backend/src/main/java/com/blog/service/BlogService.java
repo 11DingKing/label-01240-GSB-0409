@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
@@ -26,6 +28,7 @@ public class BlogService {
     /**
      * 获取博客列表（公开）
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public PageResult<Blog> getBlogList(PageRequest request) {
         List<Blog> list = blogMapper.findList(request.getKeyword(), request.getStatus(),
                 request.getOffset(), request.getSize());
@@ -36,6 +39,7 @@ public class BlogService {
     /**
      * 获取博客详情
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public Blog getBlogDetail(Long id) {
         Blog blog = blogMapper.findById(id);
         if (blog == null) {
@@ -52,6 +56,7 @@ public class BlogService {
     /**
      * 发布博客
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public Blog createBlog(BlogRequest request) {
         Long userId = UserContext.getUserId();
 
@@ -79,6 +84,7 @@ public class BlogService {
     /**
      * 更新博客
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public Blog updateBlog(Long id, BlogRequest request) {
         Long userId = UserContext.getUserId();
         Blog blog = blogMapper.findById(id);
@@ -106,6 +112,7 @@ public class BlogService {
     /**
      * 删除博客（软删除）
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public void deleteBlog(Long id) {
         Long userId = UserContext.getUserId();
         Blog blog = blogMapper.findById(id);
@@ -126,6 +133,7 @@ public class BlogService {
     /**
      * 批量删除博客（软删除）
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public void batchDeleteBlogs(List<Long> ids) {
         Long userId = UserContext.getUserId();
         boolean isAdmin = UserContext.isAdmin();
@@ -148,6 +156,7 @@ public class BlogService {
     /**
      * 获取用户博客列表
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public PageResult<Blog> getUserBlogs(Long userId, PageRequest request) {
         List<Blog> list = blogMapper.findByAuthorId(userId, 1, request.getOffset(), request.getSize());
         Long total = blogMapper.countByAuthorId(userId, 1);
@@ -157,6 +166,7 @@ public class BlogService {
     /**
      * 获取我的博客列表
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public PageResult<Blog> getMyBlogs(PageRequest request) {
         Long userId = UserContext.getUserId();
         List<Blog> list = blogMapper.findByAuthorId(userId, request.getStatus(),
@@ -168,6 +178,7 @@ public class BlogService {
     /**
      * 获取全站博客列表（管理员）
      */
+    @Transactional(readOnly = true, propagation = Propagation.REQUIRED)
     public PageResult<Blog> getAllBlogs(PageRequest request) {
         List<Blog> list = blogMapper.findAllList(request.getKeyword(), request.getStatus(),
                 request.getOffset(), request.getSize());
@@ -178,6 +189,7 @@ public class BlogService {
     /**
      * 更新博客状态（管理员）
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public void updateBlogStatus(Long id, Integer status) {
         Blog blog = blogMapper.findById(id);
         if (blog == null) {
@@ -191,6 +203,7 @@ public class BlogService {
     /**
      * 更新博客状态（带审核原因）
      */
+    @Transactional(propagation = Propagation.REQUIRED)
     public void updateBlogStatusWithReason(Long id, Integer status, String reason, Long reviewerId) {
         Blog blog = blogMapper.findById(id);
         if (blog == null) {
