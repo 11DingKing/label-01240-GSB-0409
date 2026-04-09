@@ -192,6 +192,13 @@ public class BlogService {
             throw new BusinessException("博客不存在");
         }
 
+        BlogStatus currentStatus = BlogStatus.fromValue(blog.getStatus());
+        BlogStatus newStatus = BlogStatus.fromValue(status);
+        
+        if (!currentStatus.canTransitionTo(newStatus)) {
+            throw new BusinessException("无法从状态 " + currentStatus.getDescription() + " 直接变更为 " + newStatus.getDescription());
+        }
+
         blogMapper.updateStatusWithReason(id, status, reason, reviewerId);
         log.info("管理员审核博客: blogId={}, status={}, reason={}", id, status, reason);
     }
