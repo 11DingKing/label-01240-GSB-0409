@@ -4,12 +4,15 @@ import com.blog.dto.BlogRequest;
 import com.blog.dto.PageRequest;
 import com.blog.dto.PageResult;
 import com.blog.entity.Blog;
+import com.blog.entity.BlogStatus;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.BlogMapper;
 import com.blog.util.UserContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -186,6 +189,7 @@ public class BlogService {
     /**
      * 更新博客状态（带审核原因）
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void updateBlogStatusWithReason(Long id, Integer status, String reason, Long reviewerId) {
         Blog blog = blogMapper.findById(id);
         if (blog == null) {

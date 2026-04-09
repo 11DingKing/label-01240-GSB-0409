@@ -6,19 +6,16 @@ import com.blog.entity.Comment;
 import com.blog.entity.ReviewLog;
 import com.blog.entity.User;
 import com.blog.exception.BusinessException;
-import com.blog.mapper.BlogMapper;
 import com.blog.mapper.ReviewLogMapper;
-import com.blog.mapper.UserMapper;
 import com.blog.service.BlogService;
 import com.blog.service.CommentService;
+import com.blog.service.DashboardService;
 import com.blog.service.UserService;
 import com.blog.util.UserContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,10 +40,7 @@ public class AdminController {
     private ReviewLogMapper reviewLogMapper;
 
     @Autowired
-    private BlogMapper blogMapper;
-
-    @Autowired
-    private UserMapper userMapper;
+    private DashboardService dashboardService;
 
     /**
      * 验证管理员权限
@@ -176,17 +170,10 @@ public class AdminController {
     /**
      * 获取Dashboard统计数据
      */
-    @Cacheable(value = "dashboard", key = "'stats'")
     @GetMapping("/dashboard")
     public Result<Map<String, Object>> getDashboardStats() {
         checkAdmin();
-        
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("todayNewBlogs", blogMapper.countTodayNewBlogs());
-        stats.put("todayNewUsers", userMapper.countTodayNewUsers());
-        stats.put("pendingReviewBlogs", blogMapper.countPendingReviewBlogs());
-        stats.put("weeklyBlogTrends", blogMapper.countBlogsLast7Days());
-        
+        Map<String, Object> stats = dashboardService.getDashboardStats();
         return Result.success(stats);
     }
 }

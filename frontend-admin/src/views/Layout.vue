@@ -11,17 +11,31 @@
             <span class="logo-text">BlogSpace</span>
           </router-link>
         </div>
-        
+
         <nav class="header-nav">
-          <router-link to="/home" class="nav-link" :class="{ active: isActive('/home') }">
+          <router-link
+            to="/home"
+            class="nav-link"
+            :class="{ active: isActive('/home') }"
+          >
             <el-icon><House /></el-icon>
             <span>首页</span>
           </router-link>
-          <router-link v-if="isLoggedIn" to="/write" class="nav-link" :class="{ active: isActive('/write') }">
+          <router-link
+            v-if="isLoggedIn"
+            to="/write"
+            class="nav-link"
+            :class="{ active: isActive('/write') }"
+          >
             <el-icon><EditPen /></el-icon>
             <span>写文章</span>
           </router-link>
-          <router-link v-if="isLoggedIn" to="/my-blogs" class="nav-link" :class="{ active: isActive('/my-blogs') }">
+          <router-link
+            v-if="isLoggedIn"
+            to="/my-blogs"
+            class="nav-link"
+            :class="{ active: isActive('/my-blogs') }"
+          >
             <el-icon><Document /></el-icon>
             <span>我的文章</span>
           </router-link>
@@ -33,6 +47,9 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu class="admin-menu">
+                <el-dropdown-item @click="$router.push('/admin/dashboard')">
+                  <el-icon><DataLine /></el-icon>数据看板
+                </el-dropdown-item>
                 <el-dropdown-item @click="$router.push('/admin/users')">
                   <el-icon><User /></el-icon>用户管理
                 </el-dropdown-item>
@@ -51,12 +68,22 @@
           <template v-if="isLoggedIn">
             <el-dropdown trigger="hover" @command="handleCommand">
               <div class="user-dropdown">
-                <el-avatar :size="36" :src="userInfo?.avatar || ''" class="user-avatar">
+                <el-avatar
+                  :size="36"
+                  :src="userInfo?.avatar || ''"
+                  class="user-avatar"
+                >
                   {{ userInfo?.username?.charAt(0)?.toUpperCase() }}
                 </el-avatar>
                 <div class="user-meta">
                   <span class="user-name">{{ userInfo?.username }}</span>
-                  <el-tag v-if="isAdmin" size="small" type="danger" effect="dark">管理员</el-tag>
+                  <el-tag
+                    v-if="isAdmin"
+                    size="small"
+                    type="danger"
+                    effect="dark"
+                    >管理员</el-tag
+                  >
                 </div>
                 <el-icon class="dropdown-arrow"><ArrowDown /></el-icon>
               </div>
@@ -68,7 +95,9 @@
                     </el-avatar>
                     <div class="user-menu-info">
                       <span class="name">{{ userInfo?.username }}</span>
-                      <span class="email">{{ userInfo?.email || '未设置邮箱' }}</span>
+                      <span class="email">{{
+                        userInfo?.email || "未设置邮箱"
+                      }}</span>
                     </div>
                   </div>
                   <el-dropdown-item command="profile">
@@ -85,8 +114,14 @@
             </el-dropdown>
           </template>
           <template v-else>
-            <el-button class="login-btn" @click="$router.push('/login')">登录</el-button>
-            <el-button type="primary" class="register-btn" @click="$router.push('/register')">
+            <el-button class="login-btn" @click="$router.push('/login')"
+              >登录</el-button
+            >
+            <el-button
+              type="primary"
+              class="register-btn"
+              @click="$router.push('/register')"
+            >
               免费注册
             </el-button>
           </template>
@@ -122,37 +157,37 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { useUserStore } from '../stores/user'
+import { computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
+import { useUserStore } from "../stores/user";
 
-const route = useRoute()
-const router = useRouter()
-const userStore = useUserStore()
+const route = useRoute();
+const router = useRouter();
+const userStore = useUserStore();
 
-const isLoggedIn = computed(() => userStore.isLoggedIn)
-const userInfo = computed(() => userStore.userInfo)
-const isAdmin = computed(() => userStore.isAdmin())
-const isAdminRoute = computed(() => route.path.startsWith('/admin'))
+const isLoggedIn = computed(() => userStore.isLoggedIn);
+const userInfo = computed(() => userStore.userInfo);
+const isAdmin = computed(() => userStore.isAdmin());
+const isAdminRoute = computed(() => route.path.startsWith("/admin"));
 
 function isActive(path) {
-  return route.path === path
+  return route.path === path;
 }
 
 function handleCommand(command) {
-  if (command === 'profile') {
-    router.push('/profile')
-  } else if (command === 'my-blogs') {
-    router.push('/my-blogs')
-  } else if (command === 'logout') {
-    userStore.logout()
+  if (command === "profile") {
+    router.push("/profile");
+  } else if (command === "my-blogs") {
+    router.push("/my-blogs");
+  } else if (command === "logout") {
+    userStore.logout();
     ElMessage({
-      message: '已安全退出，期待您的再次访问 👋',
-      type: 'success',
-      duration: 3000
-    })
-    router.push('/home')
+      message: "已安全退出，期待您的再次访问 👋",
+      type: "success",
+      duration: 3000,
+    });
+    router.push("/home");
   }
 }
 </script>
@@ -193,7 +228,7 @@ function handleCommand(command) {
     align-items: center;
     gap: 12px;
     text-decoration: none;
-    
+
     .logo-icon {
       width: 40px;
       height: 40px;
@@ -206,12 +241,12 @@ function handleCommand(command) {
       font-size: 20px;
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
       transition: transform var(--transition-normal);
-      
+
       &:hover {
         transform: scale(1.05);
       }
     }
-    
+
     .logo-text {
       font-size: 22px;
       font-weight: 700;
@@ -227,7 +262,7 @@ function handleCommand(command) {
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   .nav-link {
     display: flex;
     align-items: center;
@@ -240,21 +275,21 @@ function handleCommand(command) {
     font-size: 15px;
     transition: all var(--transition-normal);
     cursor: pointer;
-    
+
     .el-icon {
       font-size: 18px;
     }
-    
+
     .arrow {
       font-size: 14px;
       margin-left: 2px;
     }
-    
+
     &:hover {
       color: var(--primary-color);
       background: rgba(92, 107, 192, 0.08);
     }
-    
+
     &.active {
       color: var(--primary-color);
       background: rgba(92, 107, 192, 0.12);
@@ -265,10 +300,10 @@ function handleCommand(command) {
 .admin-dropdown {
   .admin-menu {
     min-width: 160px;
-    
+
     .el-dropdown-item {
       padding: 12px 16px;
-      
+
       .el-icon {
         margin-right: 8px;
       }
@@ -280,12 +315,12 @@ function handleCommand(command) {
   display: flex;
   align-items: center;
   gap: 16px;
-  
+
   .login-btn {
     border-radius: var(--radius-sm);
     font-weight: 500;
   }
-  
+
   .register-btn {
     border-radius: var(--radius-sm);
     font-weight: 500;
@@ -301,27 +336,27 @@ function handleCommand(command) {
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-normal);
-  
+
   &:hover {
     background: var(--bg-secondary);
   }
-  
+
   .user-avatar {
     border: 2px solid var(--primary-light);
   }
-  
+
   .user-meta {
     display: flex;
     flex-direction: column;
     gap: 2px;
-    
+
     .user-name {
       font-weight: 600;
       font-size: 14px;
       color: var(--text-primary);
     }
   }
-  
+
   .dropdown-arrow {
     color: var(--text-secondary);
     font-size: 14px;
@@ -331,7 +366,7 @@ function handleCommand(command) {
 .user-menu {
   min-width: 220px;
   padding: 8px;
-  
+
   .user-menu-header {
     display: flex;
     align-items: center;
@@ -339,34 +374,34 @@ function handleCommand(command) {
     padding: 16px;
     border-bottom: 1px solid var(--border-light);
     margin-bottom: 8px;
-    
+
     .user-menu-info {
       display: flex;
       flex-direction: column;
-      
+
       .name {
         font-weight: 600;
         font-size: 15px;
         color: var(--text-primary);
       }
-      
+
       .email {
         font-size: 12px;
         color: var(--text-secondary);
       }
     }
   }
-  
+
   .el-dropdown-item {
     padding: 12px 16px;
     border-radius: var(--radius-sm);
     margin: 2px 0;
-    
+
     .el-icon {
       margin-right: 10px;
       font-size: 16px;
     }
-    
+
     &:hover {
       background: var(--bg-secondary);
     }
@@ -395,12 +430,12 @@ function handleCommand(command) {
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  
+
   .footer-brand {
     display: flex;
     align-items: center;
     gap: 8px;
-    
+
     .logo-icon.small {
       width: 32px;
       height: 32px;
@@ -412,28 +447,28 @@ function handleCommand(command) {
       color: white;
       font-size: 16px;
     }
-    
+
     span {
       font-size: 18px;
       font-weight: 600;
       color: var(--text-primary);
     }
   }
-  
+
   .copyright {
     color: var(--text-secondary);
     font-size: 14px;
   }
-  
+
   .footer-links {
     display: flex;
     gap: 24px;
-    
+
     a {
       color: var(--text-secondary);
       font-size: 14px;
       transition: color var(--transition-fast);
-      
+
       &:hover {
         color: var(--primary-color);
       }
@@ -444,7 +479,9 @@ function handleCommand(command) {
 // 页面切换动画
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .fade-enter-from {
@@ -462,19 +499,19 @@ function handleCommand(command) {
   .header-content {
     padding: 0 16px;
   }
-  
+
   .header-nav {
     display: none;
   }
-  
+
   .logo-text {
     display: none;
   }
-  
+
   .user-meta {
     display: none !important;
   }
-  
+
   .main {
     padding: 16px;
   }
