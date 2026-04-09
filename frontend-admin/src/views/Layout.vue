@@ -33,6 +33,9 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu class="admin-menu">
+                <el-dropdown-item @click="$router.push('/admin/dashboard')">
+                  <el-icon><DataLine /></el-icon>数据看板
+                </el-dropdown-item>
                 <el-dropdown-item @click="$router.push('/admin/users')">
                   <el-icon><User /></el-icon>用户管理
                 </el-dropdown-item>

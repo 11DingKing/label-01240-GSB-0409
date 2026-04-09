@@ -68,6 +68,12 @@ const routes = [
         meta: { title: '用户管理', auth: true, admin: true }
       },
       {
+        path: 'admin/dashboard',
+        name: 'AdminDashboard',
+        component: () => import('../views/admin/Dashboard.vue'),
+        meta: { title: '数据看板', auth: true, admin: true }
+      },
+      {
         path: 'admin/blogs',
         name: 'AdminBlogs',
         component: () => import('../views/admin/Blogs.vue'),

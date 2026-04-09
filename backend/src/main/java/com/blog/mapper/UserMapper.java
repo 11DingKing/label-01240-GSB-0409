@@ -31,4 +31,7 @@ public interface UserMapper {
                         @Param("offset") Integer offset, @Param("size") Integer size);
 
     Long countList(@Param("keyword") String keyword, @Param("status") Integer status);
+
+    @Select("SELECT COUNT(*) FROM user WHERE DATE(created_at) = CURDATE()")
+    long countTodayNewUsers();
 }

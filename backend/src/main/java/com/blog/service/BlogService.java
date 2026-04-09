@@ -60,13 +60,18 @@ public class BlogService {
         blog.setContent(request.getContent());
         blog.setTags(request.getTags());
         blog.setAuthorId(userId);
-        blog.setStatus(request.getStatus());
+        // 如果用户选择发布（status=1），则自动设置为待初审
+        if (request.getStatus() == 1) {
+            blog.setStatus(Blog.STATUS_PENDING_REVIEW);
+        } else {
+            blog.setStatus(request.getStatus());
+        }
         blog.setViewCount(0);
         blog.setLikeCount(0);
         blog.setCommentCount(0);
 
         blogMapper.insert(blog);
-        log.info("用户发布博客: userId={}, blogId={}, title={}", userId, blog.getId(), blog.getTitle());
+        log.info("用户发布博客: userId={}, blogId={}, title={}, status={}", userId, blog.getId(), blog.getTitle(), blog.getStatus());
 
         return blogMapper.findById(blog.getId());
     }
@@ -191,8 +196,44 @@ public class BlogService {
         if (blog == null) {
             throw new BusinessException("博客不存在");
         }
+        
+        // 状态机校验：只允许合法的状态流转
+        validateStatusTransition(blog.getStatus(), status);
 
         blogMapper.updateStatusWithReason(id, status, reason, reviewerId);
-        log.info("管理员审核博客: blogId={}, status={}, reason={}", id, status, reason);
+        log.info("管理员审核博客: blogId={}, 从状态{}变为{}, reason={}", id, blog.getStatus(), status, reason);
+    }
+    
+    /**
+     * 校验状态流转合法性
+     * PENDING_REVIEW(3) → PENDING_FINAL(4) → PUBLISHED(1)
+     * 任意审核状态 → REJECTED(5)
+     */
+    private void validateStatusTransition(int fromStatus, int toStatus) {
+        // 允许直接变为草稿或下架
+        if (toStatus == Blog.STATUS_DRAFT || toStatus == Blog.STATUS_OFFLINE) {
+            return;
+        }
+        
+        // 拒绝状态：可从任意待审核状态变为拒绝
+        if (toStatus == Blog.STATUS_REJECTED) {
+            if (fromStatus != Blog.STATUS_PENDING_REVIEW && fromStatus != Blog.STATUS_PENDING_FINAL) {
+                throw new BusinessException("只有待审核状态的博客才能被拒绝");
+            }
+            return;
+        }
+        
+        // 正常审核流程
+        if (fromStatus == Blog.STATUS_PENDING_REVIEW) {
+            if (toStatus != Blog.STATUS_PENDING_FINAL) {
+                throw new BusinessException("待初审状态只能变更为待终审(初审通过)或已拒绝");
+            }
+        } else if (fromStatus == Blog.STATUS_PENDING_FINAL) {
+            if (toStatus != Blog.STATUS_PUBLISHED) {
+                throw new BusinessException("待终审状态只能变更为已发布(终审通过)或已拒绝");
+            }
+        } else {
+            throw new BusinessException("当前状态不允许进行审核操作");
+        }
     }
 }

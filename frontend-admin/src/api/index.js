@@ -125,7 +125,8 @@ export const adminApi = {
   getComments: (params) => api.get('/admin/comments', { params }),
   deleteComment: (id, reason) => api.delete(`/admin/comments/${id}`, { params: { reason } }),
   getReviewLogs: (params) => api.get('/admin/review-logs', { params }),
-  getReviewHistory: (targetType, targetId) => api.get(`/admin/review-logs/${targetType}/${targetId}`)
+  getReviewHistory: (targetType, targetId) => api.get(`/admin/review-logs/${targetType}/${targetId}`),
+  getDashboardStats: () => api.get('/admin/dashboard')
 }
 
 export default api

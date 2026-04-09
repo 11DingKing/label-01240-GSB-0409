@@ -9,6 +9,7 @@ import com.blog.exception.BusinessException;
 import com.blog.mapper.ReviewLogMapper;
 import com.blog.service.BlogService;
 import com.blog.service.CommentService;
+import com.blog.service.DashboardService;
 import com.blog.service.UserService;
 import com.blog.util.UserContext;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,9 @@ public class AdminController {
     @Autowired
     private ReviewLogMapper reviewLogMapper;
 
+    @Autowired
+    private DashboardService dashboardService;
+
     /**
      * 验证管理员权限
      */
@@ -58,6 +62,16 @@ public class AdminController {
         log.setReviewerId(UserContext.getUserId());
         log.setReviewerName(UserContext.getUsername());
         reviewLogMapper.insert(log);
+    }
+
+    /**
+     * 获取看板统计数据
+     */
+    @GetMapping("/dashboard")
+    public Result<DashboardStats> getDashboardStats() {
+        checkAdmin();
+        DashboardStats stats = dashboardService.getDashboardStats();
+        return Result.success(stats);
     }
 
     /**
@@ -108,7 +122,18 @@ public class AdminController {
         checkAdmin();
         blogService.updateBlogStatusWithReason(id, status, reason, UserContext.getUserId());
         
-        String action = status == 1 ? "approve" : "reject";
+        String action;
+        if (status == Blog.STATUS_PENDING_FINAL) {
+            action = "first_approve";
+        } else if (status == Blog.STATUS_PUBLISHED) {
+            action = "final_approve";
+        } else if (status == Blog.STATUS_REJECTED) {
+            action = "reject";
+        } else if (status == Blog.STATUS_OFFLINE) {
+            action = "offline";
+        } else {
+            action = "other";
+        }
         recordReviewLog("blog", id, action, reason);
         
         return Result.success("更新成功", null);
