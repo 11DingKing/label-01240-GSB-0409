@@ -7,12 +7,15 @@ import com.blog.entity.ReviewLog;
 import com.blog.entity.User;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.ReviewLogMapper;
+import com.blog.service.BlogReviewService;
 import com.blog.service.BlogService;
 import com.blog.service.CommentService;
+import com.blog.service.DashboardService;
 import com.blog.service.UserService;
 import com.blog.util.UserContext;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,19 +26,15 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/admin")
+@RequiredArgsConstructor
 public class AdminController {
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private BlogService blogService;
-
-    @Autowired
-    private CommentService commentService;
-
-    @Autowired
-    private ReviewLogMapper reviewLogMapper;
+    private final UserService userService;
+    private final BlogService blogService;
+    private final CommentService commentService;
+    private final BlogReviewService blogReviewService;
+    private final DashboardService dashboardService;
+    private final ReviewLogMapper reviewLogMapper;
 
     /**
      * 验证管理员权限
@@ -98,20 +97,29 @@ public class AdminController {
     }
 
     /**
-     * 更新博客状态（带审核原因）
+     * 审核博客（带状态机校验）
+     * 状态流转：PENDING_REVIEW(10) -> PENDING_FINAL(20) -> PUBLISHED(1)
+     *                     \-> REJECTED(30)
+     *          PENDING_FINAL(20) -> PUBLISHED(1)
+     *                     \-> REJECTED(30)
      */
-    @PutMapping("/blogs/{id}/status")
-    public Result<Void> updateBlogStatus(
-            @PathVariable Long id, 
-            @RequestParam Integer status,
-            @RequestParam(required = false) String reason) {
+    @PutMapping("/blogs/{id}/review")
+    public Result<Void> reviewBlog(
+            @PathVariable Long id,
+            @Valid @RequestBody BlogReviewRequest request) {
         checkAdmin();
-        blogService.updateBlogStatusWithReason(id, status, reason, UserContext.getUserId());
-        
-        String action = status == 1 ? "approve" : "reject";
-        recordReviewLog("blog", id, action, reason);
-        
-        return Result.success("更新成功", null);
+        blogReviewService.reviewBlog(id, request);
+        return Result.success("审核成功", null);
+    }
+
+    /**
+     * 获取仪表盘统计数据
+     */
+    @GetMapping("/dashboard")
+    public Result<DashboardStatsDTO> getDashboardStats() {
+        checkAdmin();
+        DashboardStatsDTO stats = dashboardService.getDashboardStats();
+        return Result.success(stats);
     }
 
     /**

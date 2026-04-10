@@ -8,10 +8,12 @@
       <!-- 搜索栏 -->
       <div class="search-bar">
         <el-input v-model="keyword" placeholder="搜索标题/标签" clearable style="width: 200px" @keyup.enter="handleSearch" />
-        <el-select v-model="status" placeholder="状态" clearable style="width: 120px" @change="handleSearch">
-          <el-option label="已发布" :value="1" />
+        <el-select v-model="status" placeholder="状态" clearable style="width: 150px" @change="handleSearch">
           <el-option label="草稿" :value="0" />
-          <el-option label="已下架" :value="2" />
+          <el-option label="已发布" :value="1" />
+          <el-option label="待初审" :value="10" />
+          <el-option label="待终审" :value="20" />
+          <el-option label="已拒绝" :value="30" />
         </el-select>
         <el-button type="primary" @click="handleSearch">搜索</el-button>
       </div>
@@ -25,7 +27,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="authorName" label="作者" width="120" />
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column prop="status" label="状态" width="120">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)" size="small">
               {{ getStatusText(row.status) }}
@@ -39,27 +41,73 @@
             {{ formatTime(row.createdAt) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150">
+        <el-table-column label="操作" width="200">
           <template #default="{ row }">
             <div class="table-actions">
-              <el-button
-                v-if="row.status === 1"
-                type="warning"
-                text
-                size="small"
-                @click="updateStatus(row, 2)"
-              >
-                下架
-              </el-button>
-              <el-button
-                v-if="row.status === 2"
-                type="success"
-                text
-                size="small"
-                @click="updateStatus(row, 1)"
-              >
-                上架
-              </el-button>
+              <!-- 待初审：可初审通过或拒绝 -->
+              <template v-if="row.status === 10">
+                <el-button
+                  type="success"
+                  text
+                  size="small"
+                  @click="handleReview(row, 20)"
+                >
+                  初审通过
+                </el-button>
+                <el-button
+                  type="danger"
+                  text
+                  size="small"
+                  @click="handleReview(row, 30)"
+                >
+                  拒绝
+                </el-button>
+              </template>
+
+              <!-- 待终审：可终审通过或拒绝 -->
+              <template v-else-if="row.status === 20">
+                <el-button
+                  type="success"
+                  text
+                  size="small"
+                  @click="handleReview(row, 1)"
+                >
+                  终审通过
+                </el-button>
+                <el-button
+                  type="danger"
+                  text
+                  size="small"
+                  @click="handleReview(row, 30)"
+                >
+                  拒绝
+                </el-button>
+              </template>
+
+              <!-- 已发布：可下架 -->
+              <template v-else-if="row.status === 1">
+                <el-button
+                  type="warning"
+                  text
+                  size="small"
+                  @click="handleReview(row, 30)"
+                >
+                  下架
+                </el-button>
+              </template>
+
+              <!-- 已拒绝：可重新审核 -->
+              <template v-else-if="row.status === 30">
+                <el-button
+                  type="primary"
+                  text
+                  size="small"
+                  @click="handleReview(row, 10)"
+                >
+                  重新提交
+                </el-button>
+              </template>
+
               <el-button type="danger" text size="small" @click="deleteBlog(row)">删除</el-button>
             </div>
           </template>
@@ -122,33 +170,89 @@ function handleSearch() {
 }
 
 function getStatusType(status) {
-  const types = { 0: 'info', 1: 'success', 2: 'warning' }
+  const types = {
+    0: 'info',      // 草稿
+    1: 'success',   // 已发布
+    10: 'warning',  // 待初审
+    20: 'warning',  // 待终审
+    30: 'danger'    // 已拒绝
+  }
   return types[status] || 'info'
 }
 
 function getStatusText(status) {
-  const texts = { 0: '草稿', 1: '已发布', 2: '已下架' }
+  const texts = {
+    0: '草稿',
+    1: '已发布',
+    10: '待初审',
+    20: '待终审',
+    30: '已拒绝'
+  }
   return texts[status] || '未知'
 }
 
-async function updateStatus(blog, newStatus) {
-  const action = newStatus === 2 ? '下架' : '上架'
+function getActionText(status) {
+  const texts = {
+    1: '终审通过',
+    20: '初审通过',
+    30: '拒绝'
+  }
+  return texts[status] || '操作'
+}
+
+async function handleReview(blog, newStatus) {
+  const actionText = getActionText(newStatus)
+  const isReject = newStatus === 30
+
   try {
-    const { value: reason } = await ElMessageBox.prompt(
-      `请输入${action}原因（可选）：`, 
-      `${action}博客"${blog.title}"`,
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        inputPlaceholder: '如：内容违规、广告信息等',
-        type: 'warning'
-      }
-    )
-    await adminApi.updateBlogStatus(blog.id, newStatus, reason || '')
-    ElMessage.success(`${action}成功`)
+    let reason = ''
+
+    if (isReject) {
+      // 拒绝时必须填写原因
+      const { value } = await ElMessageBox.prompt(
+        `请输入拒绝原因：`,
+        `拒绝博客"${blog.title}"`,
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputPlaceholder: '如：内容违规、广告信息等',
+          type: 'warning',
+          inputValidator: (value) => {
+            if (!value || value.trim() === '') {
+              return '拒绝原因不能为空'
+            }
+            return true
+          }
+        }
+      )
+      reason = value
+    } else {
+      // 通过时可选填写原因
+      const { value } = await ElMessageBox.prompt(
+        `请输入${actionText}原因（可选）：`,
+        `${actionText}"${blog.title}"`,
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputPlaceholder: '如：内容优质、符合规范等',
+          type: 'success'
+        }
+      )
+      reason = value || ''
+    }
+
+    await adminApi.reviewBlog(blog.id, {
+      status: newStatus,
+      reason: reason
+    })
+
+    ElMessage.success(`${actionText}成功`)
     fetchBlogs()
   } catch (e) {
-    if (e !== 'cancel') console.error(e)
+    if (e !== 'cancel') {
+      console.error(e)
+      ElMessage.error(e.response?.data?.message || '操作失败')
+    }
   }
 }
 
@@ -179,5 +283,11 @@ function formatTime(time) {
   &:hover {
     text-decoration: underline;
   }
+}
+
+.table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 </style>

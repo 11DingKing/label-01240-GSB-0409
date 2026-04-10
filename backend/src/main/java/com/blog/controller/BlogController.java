@@ -2,10 +2,11 @@ package com.blog.controller;
 
 import com.blog.dto.*;
 import com.blog.entity.Blog;
+import com.blog.service.BlogReviewService;
 import com.blog.service.BlogService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -14,10 +15,11 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/api/blogs")
+@RequiredArgsConstructor
 public class BlogController {
 
-    @Autowired
-    private BlogService blogService;
+    private final BlogService blogService;
+    private final BlogReviewService blogReviewService;
 
     /**
      * 获取博客列表（公开）
@@ -92,5 +94,14 @@ public class BlogController {
     public Result<PageResult<Blog>> getMyBlogs(PageRequest request) {
         PageResult<Blog> result = blogService.getMyBlogs(request);
         return Result.success(result);
+    }
+
+    /**
+     * 提交博客审核（草稿 -> 待初审）
+     */
+    @PostMapping("/{id}/submit")
+    public Result<Void> submitForReview(@PathVariable Long id) {
+        blogReviewService.submitForReview(id);
+        return Result.success("提交审核成功", null);
     }
 }

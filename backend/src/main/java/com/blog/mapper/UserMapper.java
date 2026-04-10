@@ -27,8 +27,14 @@ public interface UserMapper {
     @Update("UPDATE user SET password = #{password} WHERE id = #{id}")
     int updatePassword(@Param("id") Long id, @Param("password") String password);
 
-    List<User> findList(@Param("keyword") String keyword, @Param("status") Integer status, 
+    List<User> findList(@Param("keyword") String keyword, @Param("status") Integer status,
                         @Param("offset") Integer offset, @Param("size") Integer size);
 
     Long countList(@Param("keyword") String keyword, @Param("status") Integer status);
+
+    /**
+     * 统计今日新增用户数
+     */
+    @Select("SELECT COUNT(*) FROM user WHERE DATE(created_at) = CURDATE()")
+    Long countTodayNewUsers();
 }
