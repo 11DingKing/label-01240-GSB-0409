@@ -4,6 +4,7 @@ import com.blog.entity.Blog;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 博客Mapper
@@ -70,4 +71,16 @@ public interface BlogMapper {
 
     @Select("SELECT COALESCE(SUM(like_count), 0) FROM blog WHERE author_id = #{authorId} AND deleted_at IS NULL")
     Integer sumLikesByAuthor(Long authorId);
+
+    @Select("SELECT COUNT(*) FROM blog WHERE DATE(created_at) = CURDATE() AND deleted_at IS NULL")
+    long countTodayNewBlogs();
+
+    @Select("SELECT COUNT(*) FROM blog WHERE status IN (3, 4) AND deleted_at IS NULL")
+    long countPendingReviewBlogs();
+
+    @Select("SELECT DATE(created_at) as date, COUNT(*) as count FROM blog " +
+            "WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) " +
+            "AND status = 1 AND deleted_at IS NULL " +
+            "GROUP BY DATE(created_at) ORDER BY date ASC")
+    List<Map<String, Object>> getLast7DaysPublishTrend();
 }

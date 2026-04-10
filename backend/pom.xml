@@ -87,10 +87,23 @@
             <scope>runtime</scope>
         </dependency>
         
-        <!-- BCrypt -->
+        <!-- Spring Security Crypto -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+        
+        <!-- Spring Cache + Caffeine -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        
+        <!-- Caffeine 缓存：注意：环境网络限制可能需要手动下载 -->
+        <dependency>
+            <groupId>com.github.benmanes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>3.1.8</version>
         </dependency>
         
         <!-- Test -->
