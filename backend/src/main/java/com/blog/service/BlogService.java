@@ -39,6 +39,7 @@ public class BlogService {
     /**
      * 获取博客详情
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public Blog getBlogDetail(Long id) {
         Blog blog = blogMapper.findById(id);
         if (blog == null) {
@@ -55,6 +56,7 @@ public class BlogService {
     /**
      * 发布博客
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public Blog createBlog(BlogRequest request) {
         Long userId = UserContext.getUserId();
 
@@ -77,6 +79,7 @@ public class BlogService {
     /**
      * 更新博客
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public Blog updateBlog(Long id, BlogRequest request) {
         Long userId = UserContext.getUserId();
         Blog blog = blogMapper.findById(id);
@@ -104,6 +107,7 @@ public class BlogService {
     /**
      * 删除博客（软删除）
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteBlog(Long id) {
         Long userId = UserContext.getUserId();
         Blog blog = blogMapper.findById(id);
@@ -124,6 +128,7 @@ public class BlogService {
     /**
      * 批量删除博客（软删除）
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void batchDeleteBlogs(List<Long> ids) {
         Long userId = UserContext.getUserId();
         boolean isAdmin = UserContext.isAdmin();
@@ -176,6 +181,7 @@ public class BlogService {
     /**
      * 更新博客状态（管理员）
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void updateBlogStatus(Long id, Integer status) {
         Blog blog = blogMapper.findById(id);
         if (blog == null) {
