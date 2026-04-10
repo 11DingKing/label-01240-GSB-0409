@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -31,7 +33,8 @@ public class DashboardService {
      * 获取仪表盘统计数据
      * 缓存30秒
      */
-    @Cacheable(value = DASHBOARD_CACHE, key = "'stats'")
+    @Cacheable(value = DASHBOARD_CACHE, key = "'admin:dashboard'")
+    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     public DashboardStatsDTO getDashboardStats() {
         log.debug("获取仪表盘统计数据（未命中缓存）");
 

@@ -11,6 +11,7 @@ import com.blog.util.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -35,7 +36,7 @@ public class BlogReviewService {
      * @param blogId 博客ID
      * @param request 审核请求
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     public void reviewBlog(Long blogId, BlogReviewRequest request) {
         Blog blog = blogMapper.findById(blogId);
         if (blog == null) {
@@ -99,7 +100,7 @@ public class BlogReviewService {
      *
      * @param blogId 博客ID
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
     public void submitForReview(Long blogId) {
         Long userId = UserContext.getUserId();
         Blog blog = blogMapper.findById(blogId);
