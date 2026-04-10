@@ -18,16 +18,13 @@
     <description>Personal Blog System</description>
     
     <properties>
-        <java.version>24</java.version>
+        <java.version>17</java.version>
         <mybatis.version>3.0.3</mybatis.version>
-        <maven.compiler.source>24</maven.compiler.source>
-        <maven.compiler.target>24</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
-    <!-- Maven 版本约束 -->
-    <prerequisites>
-        <maven>3.9.11</maven>
-    </prerequisites>
+
     
     <dependencies>
         <!-- Spring Boot Starters -->
@@ -92,7 +89,19 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
         </dependency>
-        
+
+        <!-- Spring Cache -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+
+        <!-- Caffeine Cache -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -128,32 +137,7 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <!-- Maven 版本强制检查 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.4.1</version>
-                <executions>
-                    <execution>
-                        <id>enforce-maven</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireMavenVersion>
-                                    <version>[3.9.11,)</version>
-                                    <message>需要 Maven 3.9.11 或更高版本</message>
-                                </requireMavenVersion>
-                                <requireJavaVersion>
-                                    <version>[24,)</version>
-                                    <message>需要 JDK 24 或更高版本</message>
-                                </requireJavaVersion>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+
         </plugins>
     </build>
 </project>

@@ -70,4 +70,22 @@ public interface BlogMapper {
 
     @Select("SELECT COALESCE(SUM(like_count), 0) FROM blog WHERE author_id = #{authorId} AND deleted_at IS NULL")
     Integer sumLikesByAuthor(Long authorId);
+
+    /**
+     * 统计今日新增博客数
+     */
+    @Select("SELECT COUNT(*) FROM blog WHERE DATE(created_at) = CURDATE() AND deleted_at IS NULL")
+    Long countTodayNewBlogs();
+
+    /**
+     * 根据状态统计博客数
+     */
+    @Select("SELECT COUNT(*) FROM blog WHERE status = #{status} AND deleted_at IS NULL")
+    Long countByStatus(@Param("status") Integer status);
+
+    /**
+     * 统计指定日期发布的博客数（已发布状态）
+     */
+    @Select("SELECT COUNT(*) FROM blog WHERE DATE(created_at) = #{date} AND status = 1 AND deleted_at IS NULL")
+    Long countPublishedByDate(@Param("date") String date);
 }

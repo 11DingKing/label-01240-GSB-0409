@@ -121,11 +121,12 @@ export const adminApi = {
   getUsers: (params) => api.get('/admin/users', { params }),
   updateUserStatus: (id, status, reason) => api.put(`/admin/users/${id}/status`, null, { params: { status, reason } }),
   getBlogs: (params) => api.get('/admin/blogs', { params }),
-  updateBlogStatus: (id, status, reason) => api.put(`/admin/blogs/${id}/status`, null, { params: { status, reason } }),
+  reviewBlog: (id, data) => api.put(`/admin/blogs/${id}/review`, data),
   getComments: (params) => api.get('/admin/comments', { params }),
   deleteComment: (id, reason) => api.delete(`/admin/comments/${id}`, { params: { reason } }),
   getReviewLogs: (params) => api.get('/admin/review-logs', { params }),
-  getReviewHistory: (targetType, targetId) => api.get(`/admin/review-logs/${targetType}/${targetId}`)
+  getReviewHistory: (targetType, targetId) => api.get(`/admin/review-logs/${targetType}/${targetId}`),
+  getDashboard: () => api.get('/admin/dashboard')
 }
 
 export default api

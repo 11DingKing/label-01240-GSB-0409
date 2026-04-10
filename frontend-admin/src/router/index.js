@@ -78,6 +78,12 @@ const routes = [
         name: 'AdminComments',
         component: () => import('../views/admin/Comments.vue'),
         meta: { title: '评论管理', auth: true, admin: true }
+      },
+      {
+        path: 'admin/dashboard',
+        name: 'AdminDashboard',
+        component: () => import('../views/admin/Dashboard.vue'),
+        meta: { title: '数据看板', auth: true, admin: true }
       }
     ]
   }
