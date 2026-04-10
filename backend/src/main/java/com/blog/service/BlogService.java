@@ -4,12 +4,15 @@ import com.blog.dto.BlogRequest;
 import com.blog.dto.PageRequest;
 import com.blog.dto.PageResult;
 import com.blog.entity.Blog;
+import com.blog.entity.BlogStatus;
 import com.blog.exception.BusinessException;
 import com.blog.mapper.BlogMapper;
 import com.blog.util.UserContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -36,6 +39,7 @@ public class BlogService {
     /**
      * 获取博客详情
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public Blog getBlogDetail(Long id) {
         Blog blog = blogMapper.findById(id);
         if (blog == null) {
@@ -52,6 +56,7 @@ public class BlogService {
     /**
      * 发布博客
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public Blog createBlog(BlogRequest request) {
         Long userId = UserContext.getUserId();
 
@@ -74,6 +79,7 @@ public class BlogService {
     /**
      * 更新博客
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public Blog updateBlog(Long id, BlogRequest request) {
         Long userId = UserContext.getUserId();
         Blog blog = blogMapper.findById(id);
@@ -101,6 +107,7 @@ public class BlogService {
     /**
      * 删除博客（软删除）
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void deleteBlog(Long id) {
         Long userId = UserContext.getUserId();
         Blog blog = blogMapper.findById(id);
@@ -121,6 +128,7 @@ public class BlogService {
     /**
      * 批量删除博客（软删除）
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void batchDeleteBlogs(List<Long> ids) {
         Long userId = UserContext.getUserId();
         boolean isAdmin = UserContext.isAdmin();
@@ -173,6 +181,7 @@ public class BlogService {
     /**
      * 更新博客状态（管理员）
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void updateBlogStatus(Long id, Integer status) {
         Blog blog = blogMapper.findById(id);
         if (blog == null) {
@@ -186,10 +195,18 @@ public class BlogService {
     /**
      * 更新博客状态（带审核原因）
      */
+    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public void updateBlogStatusWithReason(Long id, Integer status, String reason, Long reviewerId) {
         Blog blog = blogMapper.findById(id);
         if (blog == null) {
             throw new BusinessException("博客不存在");
+        }
+
+        BlogStatus currentStatus = BlogStatus.fromValue(blog.getStatus());
+        BlogStatus newStatus = BlogStatus.fromValue(status);
+        
+        if (!currentStatus.canTransitionTo(newStatus)) {
+            throw new BusinessException("无法从状态 " + currentStatus.getDescription() + " 直接变更为 " + newStatus.getDescription());
         }
 
         blogMapper.updateStatusWithReason(id, status, reason, reviewerId);

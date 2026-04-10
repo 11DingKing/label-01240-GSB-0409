@@ -70,4 +70,15 @@ public interface BlogMapper {
 
     @Select("SELECT COALESCE(SUM(like_count), 0) FROM blog WHERE author_id = #{authorId} AND deleted_at IS NULL")
     Integer sumLikesByAuthor(Long authorId);
+
+    @Select("SELECT COUNT(*) FROM blog WHERE DATE(created_at) = CURDATE() AND deleted_at IS NULL")
+    Long countTodayNewBlogs();
+
+    @Select("SELECT COUNT(*) FROM blog WHERE status IN (1, 2) AND deleted_at IS NULL")
+    Long countPendingReviewBlogs();
+
+    @Select("SELECT DATE(created_at) as date, COUNT(*) as count FROM blog " +
+            "WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND deleted_at IS NULL " +
+            "GROUP BY DATE(created_at) ORDER BY date")
+    List<java.util.Map<String, Object>> countBlogsLast7Days();
 }
